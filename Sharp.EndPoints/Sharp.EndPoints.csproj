@@ -43,12 +43,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Meta.cs" />
     <Compile Include="RoutePluginSecure.cs" />
     <Compile Include="RoutePluginHandler.cs" />
     <Compile Include="RouteParser.cs" />
     <Compile Include="Attributes.cs" />
     <Compile Include="Handler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sitemap.cs" />
     <Compile Include="StateBag.cs" />
     <Compile Include="RoutePluginTemplate.cs" />
     <Compile Include="Web.cs" />
@@ -59,6 +61,15 @@
       <Project>{db8da2d9-8dfa-407c-8563-efb5a0a7a578}</Project>
       <Name>Sharp</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Sitemap.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Meta.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="api.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

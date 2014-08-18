@@ -31,15 +31,7 @@ namespace Sharp.EndPoints
 
     }
 
-    public class RoutePluginJSON : IRoutePlugin
-    {
-        public void AddValuesAndConstraints(RouteParser routeBuilder, MethodInfo methodInfo)
-        { 
-        }
-
-        public void OnInit(RequestContext requestContext, object handler)
-        {
-            
-        }
+    public class RoutePluginJSON : RoutePlugin
+    { 
     }
 }

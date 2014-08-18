@@ -13,8 +13,9 @@ namespace Example
     {
 
         protected void Application_Start(object sender, EventArgs e)
-        {
+        { 
             var app = new AssemblyParser();
+            app.AddAssemblyParsers(typeof(Sharp.EndPoints.Sitemap).Assembly, new RouteParser(new RoutePluginTemplate()));
             app.AddAssemblyParsers(typeof(Global).Assembly, new RouteParser(new RoutePluginTemplate(), new RoutePluginSecure()));
             app.Parse();
         }

@@ -10,9 +10,9 @@ using System.Web.Routing;
 
 namespace Sharp.EndPoints
 {  
-    public class RoutePluginSecure : IRoutePlugin
+    public class RoutePluginSecure : RoutePlugin
     {
-        public void AddValuesAndConstraints(RouteParser routeBuilder, MethodInfo methodInfo)
+        public override void AddRouteProperties(RouteParser routeBuilder, MethodInfo methodInfo)
         {
             Object[] AttributesArray = ((MethodInfo)methodInfo).GetCustomAttributes(typeof(Secure), true);
             if (AttributesArray.Length > 0)
@@ -23,13 +23,13 @@ namespace Sharp.EndPoints
              
         }
 
-        public void OnInit(RequestContext requestContext, object handler)
+        public override void PreHandlerInit(RequestContext requestContext)
         {
             var context = HttpContext.Current;
             Secure secure = (Secure)requestContext.RouteData.Values["SecureArea"];
 
             if (secure != null)
-            {  
+            {
                 if (!context.User.Identity.IsAuthenticated)
                 {
                     if (secure.Roles.Length > 0)
@@ -43,7 +43,7 @@ namespace Sharp.EndPoints
                 }
 
             }
-
         }
+         
     }
 }

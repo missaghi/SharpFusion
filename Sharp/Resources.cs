@@ -5,10 +5,10 @@ using System.Reflection;
 namespace Sharp
 {
 
-    public class Resources
+    public class Resources<T>
     {
-        static Read _LoadFile = new Read();
-        public static Read Read
+        static Read<T> _LoadFile = new Read<T>();
+        public static Read<T> Read
         {
             get
             {
@@ -17,7 +17,7 @@ namespace Sharp
         }
     }
 
-    public class Read
+    public class Read<T>
     {
 
         public string this[string i]
@@ -25,8 +25,8 @@ namespace Sharp
             get
             {
                 string result;
-                using (Stream stream = Assembly.GetExecutingAssembly()
-                               .GetManifestResourceStream(i))
+                Assembly assembly = typeof(T).Assembly;
+                using (Stream stream = assembly.GetManifestResourceStream(assembly.GetName().Name + "." + i))
                 using (StreamReader reader = new StreamReader(stream))
                 {
                     result = reader.ReadToEnd();

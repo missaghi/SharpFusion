@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 
 namespace Sharp
 { 
-
     public interface TypeParser
     {
         void ParseType(Type type);
     }
+
+
 
     public class AssemblyParser
     {
@@ -22,7 +23,10 @@ namespace Sharp
         public void AddAssemblyParsers(Assembly assembly, params TypeParser[] parsers)
         {
             if (!assemblies.Keys.Contains(assembly))
+            {
+                Sharp.SharpHost.Instance.Assemblies.Add(assembly);
                 assemblies.Add(assembly, new List<TypeParser>());
+            }
 
             assemblies[assembly].AddRange(parsers.ToList());
         }

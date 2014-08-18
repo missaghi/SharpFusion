@@ -21,23 +21,10 @@ namespace Sharp.EndPoints
           
         private String path { get; set; }
         protected Endpoint.ContentType contentType { get; set; }
-        private Endpoint.HTTPVerb verb { get; set; } 
-        
-        public MethodInfo method
-        {
-            get
-            {
-                return (MethodInfo)context.Items["method"];
-            }
-        }
+        private Endpoint.HTTPVerb verb { get; set; }
 
-        public object handler
-        {
-            get
-            {
-                return context.Items["httphandler"];
-            }
-        } 
+        public MethodInfo method { get; set; }
+        public object handlerChildInstance { get; set; } 
 
         public bool SerializeEntireHandler = true;  
 
@@ -78,7 +65,7 @@ namespace Sharp.EndPoints
 
         public virtual void ProcessRequest(HttpContext context)
         {   
-            if (method != null && this.handler != null && context.AllErrors == null)
+            if (method != null && this.handlerChildInstance != null && context.AllErrors == null)
             {
                 Dictionary<string, object> dict = new Dictionary<string, object>();
                 var methodParameters = method.GetParameters();
@@ -110,7 +97,7 @@ namespace Sharp.EndPoints
                 if (dict.Count == methodParameters.Length)
                 {
                     //Store output of action "method"
-                    var tempdata = method.Invoke(handler, dict.Count == 0 ? new object[] { } : dict.Select(x => x.Value).ToArray());
+                    var tempdata = method.Invoke(handlerChildInstance, dict.Count == 0 ? new object[] { } : dict.Select(x => x.Value).ToArray());
                     if (data == null && tempdata != null)
                         this.data = tempdata;
                 }

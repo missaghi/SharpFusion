@@ -47,9 +47,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SharpHost.cs" />
     <Compile Include="AssemblyParser.cs" />
     <Compile Include="Cached.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="ObjectActivator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.cs" />
     <Compile Include="Serialize.cs" />

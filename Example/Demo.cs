@@ -24,8 +24,8 @@ namespace Example
 
     public class JSONDemo : JSONHandler
     {  
-        [Endpoint("try/Json")]
-        public int Cool(int id)
+        [Endpoint("try/Json/{test}")]
+        public int Cool(int id, string test)
         {
             return id + 3;
         }

@@ -60,9 +60,9 @@ namespace Sharp.EndPoints
 
     }
 
-    public class RoutePluginTemplate : IRoutePlugin
+    public class RoutePluginTemplate : RoutePlugin
     { 
-        public void AddValuesAndConstraints(RouteParser routeBuilder, MethodInfo methodInfo)
+        public override void AddRouteProperties(RouteParser routeBuilder, MethodInfo methodInfo)
         {
             Object[] AttributesArray = ((MethodInfo)methodInfo).GetCustomAttributes(typeof(TemplateFile), true);
             if (AttributesArray.Length > 0)
@@ -70,15 +70,19 @@ namespace Sharp.EndPoints
                 TemplateFile file = (TemplateFile)AttributesArray[0];
                 routeBuilder.values.Add("templatefile", file.Filename);
             }
-        }
+        } 
 
-        public void OnInit(RequestContext requestContext, object handler)
+        public override void PostHandlerInit(RequestContext requestContext, Handler handler)
         {
             if (requestContext.RouteData.Values["templatefile"] != null)
             {
                 var file = requestContext.RouteData.Values["templatefile"].ToString();
-                HttpContext.Current.Items.Add("template", new Template(new LocalFile(file)));
+                ((TemplateHandler)handler).template = new Template(new LocalFile(file));
             }
-        } 
+        }
+
+
+       
+         
     }
 }
