@@ -614,6 +614,11 @@ namespace Sharp
 
     public static class EnumUtils
     {
+        /// <summary>
+        /// Return the enum description attribute value
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public static string ToStringValue(this Enum value)
         {
             FieldInfo fi = value.GetType().GetField(value.ToString());
@@ -640,6 +645,11 @@ namespace Sharp
             }
 
             throw new ArgumentException("The string is not a description or value of the specified enum.");
+        }
+
+        public static T ToEnum<T>(this string value)
+        {
+            return (T)Enum.Parse(typeof(T), value);
         }
     }
 

@@ -11,19 +11,25 @@ using System.Web.Routing;
 namespace Sharp.EndPoints
 {
     [DataContract]
-    public abstract class JSONHandler : Handler
-    { 
+    public abstract class JSONHandler : EndpointHandler
+    {
+        public JSONHandler() {
+            
+        } 
+
         public override void ProcessHandler()
         {
-             
+            if (Query["callback"].NNOE())
+            {
+                contentType = Endpoint.ContentType.JSONP;
+            } 
         }
 
         public override void Dispose()
         {
-            if (Query["callback"] != null)
-            {
-                this.contentType = Endpoint.ContentType.JSONP;
-                this.data = Query["callback"] + "(" + this.data.ToJSON() + ")";
+            if (Query["callback"].NNOE())
+            { 
+                this.data = Query["callback"].Else("jsonpcallback") + "(" + this.data.ToJSON() + ")";
             }
 
             base.Dispose();
@@ -33,5 +39,6 @@ namespace Sharp.EndPoints
 
     public class RoutePluginJSON : RoutePlugin
     { 
+
     }
 }

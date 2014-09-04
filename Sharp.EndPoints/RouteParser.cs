@@ -15,13 +15,14 @@ namespace Sharp.EndPoints
     {
         public virtual void AddRouteProperties(RouteParser routeParser, MethodInfo methodInfo) { }
         public virtual void PreHandlerInit(RequestContext requestContext) { }
-        public virtual void PostHandlerInit(RequestContext requestContext, Handler handler) { }
+        public virtual void PostHandlerInit(RequestContext requestContext, EndpointHandler handler) { }
     } 
 
     public class RouteParser : TypeParser
     {
-        public RouteValueDictionary values { get; set; }
+        public RouteValueDictionary dataTokens { get; set; }
         public RouteValueDictionary constraints { get; set; }
+        public RouteValueDictionary values { get; set; }
         public string url { get; set; }
         public Type type { get; set; }
         public MethodEndpoint routehandler { get; set; }
@@ -45,8 +46,9 @@ namespace Sharp.EndPoints
                         Type methodEndpointType = (typeof(MethodEndpoint<>).MakeGenericType(new Type[] { type }));
                         routehandler = Instantiator.NewUpType<MethodEndpoint>(methodEndpointType); //routehandler =  (MethodEndpoint)Activator.CreateInstance(methodEndpointType);
                         routehandler.methodInfo = method;
-                        values = new RouteValueDictionary();
+                        dataTokens = new RouteValueDictionary();
                         constraints = new RouteValueDictionary();
+                        values = new RouteValueDictionary();
 
                         foreach (RoutePlugin plugin in plugins)
                         {
@@ -63,18 +65,18 @@ namespace Sharp.EndPoints
 
         private void AddRoute()
         { 
-            System.Web.Routing.RouteTable.Routes.Add(new System.Web.Routing.Route(url, null, constraints, values, routehandler)); 
+            System.Web.Routing.RouteTable.Routes.Add(new System.Web.Routing.Route(url, values, constraints, dataTokens, routehandler)); 
         }
 
         public abstract class MethodEndpoint: System.Web.Routing.IRouteHandler {
             public List<Action<RequestContext>> PreInitActions { get; set; }
-            public List<Action<RequestContext, Handler>> PostInitActions { get; set; }
+            public List<Action<RequestContext, EndpointHandler>> PostInitActions { get; set; }
             public MethodInfo methodInfo { get; set; }
 
             public MethodEndpoint()
             {
                 PreInitActions = new List<Action<RequestContext>>();
-                PostInitActions = new List<Action<RequestContext, Handler>>();
+                PostInitActions = new List<Action<RequestContext, EndpointHandler>>();
             }
 
             public virtual IHttpHandler GetHttpHandler(RequestContext requestContext)
@@ -83,21 +85,18 @@ namespace Sharp.EndPoints
             }
         }
 
-        [DataContract]
-        public class MethodEndpoint<T> : MethodEndpoint where T : Handler, new()
+        public class MethodEndpoint<T> : MethodEndpoint where T : EndpointHandler, new()
         {
             public override IHttpHandler GetHttpHandler(RequestContext requestContext)
-            {
-                foreach (var action in PreInitActions)
-                    action(requestContext);
+            { 
+                PreInitActions.ForEach(x => x(requestContext));
 
                 T t = new T();
 
                 t.method = methodInfo;
                 t.handlerChildInstance = t;
 
-                foreach (var action in PostInitActions)
-                    action(requestContext, t);
+                PostInitActions.ForEach(x => x(requestContext, t)); 
 
                 return (IHttpHandler)(object)t;
             }

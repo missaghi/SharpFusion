@@ -14,13 +14,13 @@ namespace Sharp.EndPoints
 { 
 
     [DataContract]
-    public abstract class Handler : Web, IDisposable, IHttpHandler
+    public abstract class EndpointHandler : Web, IDisposable, IHttpHandler
     {
         [DataMember]
         public object data { get; set; }
           
         private String path { get; set; }
-        protected Endpoint.ContentType contentType { get; set; }
+        public Endpoint.ContentType contentType { get; set; }
         private Endpoint.HTTPVerb verb { get; set; }
 
         public MethodInfo method { get; set; }
@@ -28,43 +28,44 @@ namespace Sharp.EndPoints
 
         public bool SerializeEntireHandler = true;  
 
-        public Handler()
-        { 
-            contentType = (context.Request.AcceptTypes ?? (new string[] { })).Count(x => (x ?? "").LikeOne(new string[] { "application/json", "text/javascript" })) > 0 ? Endpoint.ContentType.JSON : Endpoint.ContentType.HTML;  // ((HttpHandler.ContentType)(RouteTable.Routes.GetRouteData((HttpContextBase)new HttpContextWrapper(context)).Values["content-type"] ?? HttpHandler.ContentType.HTML));
+        public bool IsReusable
+        { get { return false; } }
+        
+        public abstract void ProcessHandler();
 
-            try
-            {
-                verb = ((Endpoint.HTTPVerb)(RouteTable.Routes.GetRouteData((HttpContextBase)new HttpContextWrapper(context)).Values["verb"] ?? Endpoint.HTTPVerb.ALL));
-                //responseType = ((Endpoint.ContentType)(RouteTable.Routes.GetRouteData((HttpContextBase)new HttpContextWrapper(context)).Values["content-type"] ?? Endpoint.ContentType.HTML));
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Handler can't get route data.");
-            }
+        public virtual void ProcessRequest(HttpContext context)
+        {
+            SetHeaders();
+            
+            InvokeMethod(); 
 
-            //if (responseType == Endpoint.ContentType.JSON) contentType = Endpoint.ContentType.JSON;
-            SetContentType(); 
-        }   
+            ProcessHandler();
 
-        private void SetContentType()
+            Dispose();
+        }
+
+        public void SetHeaders()
         {
             context.Response.CacheControl = "no-cache";
 
-            if (contentType == Endpoint.ContentType.JSON)
-                context.Response.ContentType = "application/json";
-            else if (contentType == Endpoint.ContentType.HTML)
-                context.Response.ContentType = "text/html";
-            else
-                throw new Exception(string.Format("content type {0} not implemented", this.contentType.ToStringValue()));
-        } 
-         
-       
+            //if no content type is defined then pick one based on the request header: Accepted Type
+            if (contentType == Endpoint.ContentType.DEFAUT)
+                contentType = (context.Request.AcceptTypes ?? (new string[] { })).Count(x => (x ?? "").LikeOne(new string[] { "application/json", "text/javascript" })) > 0 ? Endpoint.ContentType.JSON : Endpoint.ContentType.HTML;  // ((HttpHandler.ContentType)(RouteTable.Routes.GetRouteData((HttpContextBase)new HttpContextWrapper(context)).Values["content-type"] ?? HttpHandler.ContentType.HTML));
+            context.Response.ContentType = contentType.ToStringValue();
 
-        public bool IsReusable
-        { get { return false; } }
 
-        public virtual void ProcessRequest(HttpContext context)
-        {   
+            try
+            {
+                verb = RouteDataToken["verb"].Else("ALL").ToEnum<Endpoint.HTTPVerb>();   // ((Endpoint.HTTPVerb)(RouteTable.Routes.GetRouteData((HttpContextBase)new HttpContextWrapper(context)).Values["verb"] ?? Endpoint.HTTPVerb.ALL));
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Handler can't get route data:" + e.Message);
+            }
+        }
+
+        private void InvokeMethod()
+        {
             if (method != null && this.handlerChildInstance != null && context.AllErrors == null)
             {
                 Dictionary<string, object> dict = new Dictionary<string, object>();
@@ -73,7 +74,7 @@ namespace Sharp.EndPoints
                 {
                     foreach (var methodParam in methodParameters)
                     {
-                        string value = Form[methodParam.Name].Else(Query[methodParam.Name]).Else(RouteDataValue[methodParam.Name]);
+                        string value = Form[methodParam.Name].Else(Query[methodParam.Name]).Else(RouteDataToken[methodParam.Name]);
                         if (!string.IsNullOrWhiteSpace(value))
                         {
                             try
@@ -115,27 +116,19 @@ namespace Sharp.EndPoints
                     }
                 }
             }
-           
-
-            ProcessHandler();
-
-            Dispose();
-
         }  
 
 
-        public abstract void ProcessHandler();
 
         public virtual void Dispose()
         {
-
             context.Response.Expires = 0;
             {
                 if (contentType == Endpoint.ContentType.JSON)
                 {
                     Write(this.data != null || SerializeEntireHandler ? this.ToJSON() : this.data.ToJSON());
                 }
-                if (contentType == Endpoint.ContentType.JSONP)
+                else if (contentType == Endpoint.ContentType.JSONP)
                 {
                     Write(this.data);
                 }
@@ -170,10 +163,5 @@ namespace Sharp.EndPoints
                 context.Response.End();
 
         }
-
-
-
     }
-
-
 }

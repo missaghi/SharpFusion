@@ -15,8 +15,14 @@ namespace Example
         protected void Application_Start(object sender, EventArgs e)
         { 
             var app = new AssemblyParser();
-            app.AddAssemblyParsers(typeof(Sharp.EndPoints.Sitemap).Assembly, new RouteParser(new RoutePluginTemplate()));
-            app.AddAssemblyParsers(typeof(Global).Assembly, new RouteParser(new RoutePluginTemplate(), new RoutePluginSecure()));
+            app.AddAssemblyParsers(typeof(Sharp.EndPoints.Sitemap).Assembly, 
+                new RouteParser(
+                    new RoutePluginTemplate()));
+            app.AddAssemblyParsers(typeof(Global).Assembly, 
+                new RouteParser(
+                    new RoutePluginSharedTemplate(), 
+                    new RoutePluginSecure(),
+                    new RoutePluginJSON()));
             app.Parse();
         }
 
@@ -37,7 +43,8 @@ namespace Example
 
         protected void Application_Error(object sender, EventArgs e)
         {
-
+            //replace template file with your own
+            new Sharp.EndPoints.Error(sender, e) { template = new Template(Resources<Sharp.EndPoints.Error>.Read["Error.html"]) };
         }
 
         protected void Session_End(object sender, EventArgs e)

@@ -12,9 +12,8 @@ namespace Sharp.EndPoints
     public class Meta : TemplateHandler
     {
         [Endpoint("meta")]
-        public void TestMethod(string url) {
-            template = new Template(Resources<Sitemap>.Read["Meta.html"]);
-            template.Set("url", url);
+        public void TestMethod(string url) { 
+
 
             Endpoint endpoint = FindEndpoint(url);
             if (endpoint != null)
@@ -31,11 +30,11 @@ namespace Sharp.EndPoints
             this.contentType = Endpoint.ContentType.HTML;
             //gen test form
             StringBuilder sb = new StringBuilder();
-            template = new Template(Resources<Meta>.Read["api.html"]);
+            template = new Template(Resources<Meta>.Read["Meta.html"]);
 
             String Field = @"<label>{0}</label>{1}<br /><input name=""{0}"" placeholder=""{2}"" value=""[%{0}%]"" /><br />";
 
-            template.Set("RequestType", endpoint.Verb.ToString());
+            template.Set("RequestType", endpoint.Verb.ToString()); 
 
 
             if (methodInfo != null)

@@ -10,16 +10,9 @@ using System.Web.Routing;
 namespace Sharp.EndPoints
 {
 
-    public abstract class TemplateHandler : Handler
+    public abstract class TemplateHandler : EndpointHandler
     {
-        public Template template
-        {
-            get
-            {
-                return (Template)context.Items["template"];
-            }
-            set { context.Items["template"] = value; }
-        }
+        public Template template {  get;  set; }
 
         public override void ProcessHandler()
         {
@@ -28,12 +21,12 @@ namespace Sharp.EndPoints
                 sb.Reset(this.template);
                 template.Set("currenttime", DateTime.Now.ToString("M/d - h:mmtt").ToLower());
                 if (Query["Error"].NNOE())
-                    template.Error = Cached.GetFile("/a/msg/" + Query["Error"].ToInt(0).ToString() + ".htm");
+                    template.Error = template.fileRepo.ReadFile("/Content/Shared/msg/" + Query["Error"].ToInt(0).ToString() + ".htm");
                 //convert to int to prevent abuse  
                 if (Query["Warning"].NNOE())
-                    template.Warning = Cached.GetFile("/a/msg/" + Query["Warning"].ToInt(0).ToString() + ".htm");
+                    template.Warning = template.fileRepo.ReadFile("/Content/Shared/msg/" + Query["Warning"].ToInt(0).ToString() + ".htm");
                 if (Query["Msg"].NNOE())
-                    template.Msg = Cached.GetFile("/a/msg/" + Query["Msg"].ToInt(0).ToString() + ".htm");
+                    template.Msg = template.fileRepo.ReadFile("/Content/Shared/msg/" + Query["Msg"].ToInt(0).ToString() + ".htm");
                 template.Set("domain", context.Request.Url.Host);
                 template.Set("like", context.Request.Url.ToString().ToURL());
                 try
@@ -67,22 +60,19 @@ namespace Sharp.EndPoints
             Object[] AttributesArray = ((MethodInfo)methodInfo).GetCustomAttributes(typeof(TemplateFile), true);
             if (AttributesArray.Length > 0)
             {
-                TemplateFile file = (TemplateFile)AttributesArray[0];
-                routeBuilder.values.Add("templatefile", file.Filename);
+                TemplateFile tfile = (TemplateFile)AttributesArray[0];
+                routeBuilder.dataTokens.Add("templatefile", tfile); 
             }
         } 
 
-        public override void PostHandlerInit(RequestContext requestContext, Handler handler)
-        {
-            if (requestContext.RouteData.Values["templatefile"] != null)
+        public override void PostHandlerInit(RequestContext requestContext, EndpointHandler handler)
+        {  
+            if (requestContext.RouteData.DataTokens["templatefile"] != null)
             {
-                var file = requestContext.RouteData.Values["templatefile"].ToString();
-                ((TemplateHandler)handler).template = new Template(new LocalFile(file));
+                var tfile = (TemplateFile)requestContext.RouteData.DataTokens["templatefile"];
+                ((TemplateHandler)handler).template = new Template(new LocalFile(tfile.Filename));
             }
-        }
-
-
-       
+        } 
          
     }
 }

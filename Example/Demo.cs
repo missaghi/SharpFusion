@@ -19,6 +19,20 @@ namespace Example
         {
             template.Set("world", "Hi");
         }
+
+        [Endpoint("")]
+        [TemplateFile("/views/aTemplate.html")]
+        public void TestHome()
+        {
+            template.Set("world", "homepage");
+        }
+
+        [Endpoint("shared")]
+        [TemplateFile("/content/shared/js/test.js")]
+        public void CustomeContent()
+        {
+            template.Set("world", "homepage");
+        }
          
     } 
 

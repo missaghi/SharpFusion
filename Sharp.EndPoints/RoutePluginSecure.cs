@@ -18,7 +18,7 @@ namespace Sharp.EndPoints
             if (AttributesArray.Length > 0)
             {
                 Secure secure = (Secure)AttributesArray[0];
-                routeBuilder.values.Add("SecureArea", secure); 
+                routeBuilder.dataTokens.Add("SecureArea", secure); 
             }
              
         }
@@ -26,7 +26,7 @@ namespace Sharp.EndPoints
         public override void PreHandlerInit(RequestContext requestContext)
         {
             var context = HttpContext.Current;
-            Secure secure = (Secure)requestContext.RouteData.Values["SecureArea"];
+            Secure secure = (Secure)requestContext.RouteData.DataTokens["SecureArea"];
 
             if (secure != null)
             {
@@ -34,7 +34,8 @@ namespace Sharp.EndPoints
                 {
                     if (secure.Roles.Length > 0)
                     {
-                        throw new Exception("You must be a member of one of these roles to run this method: " + string.Join(",", secure.Roles));
+                        if (!secure.Roles.Any(x=> context.User.IsInRole(x)))
+                            throw new Exception("You must be a member of one of these roles to run this method: " + string.Join(",", secure.Roles));
                     }
                     else
                     {

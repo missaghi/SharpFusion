@@ -7,7 +7,7 @@ namespace Sharp.EndPoints
     public class Endpoint : Attribute
     {
         public string Url { get; set; }
-        public enum ContentType { [Description("application/json")]JSON, [Description("application/javascript")] JSONP,[Description("text/html")] HTML, [Description("application/javascript")] JAVASCRIPT }
+        public enum ContentType { [Description("text/html")] DEFAUT, [Description("text/html")] HTML, [Description("application/json")] JSON, [Description("application/javascript")] JSONP,[Description("application/javascript")] JAVASCRIPT }
         public enum HTTPVerb { POST, GET, DELETE, PUT,[Description("*")] ALL }
         public ContentType Type { get; set; }
         public HTTPVerb Verb { get; set; }
@@ -69,14 +69,12 @@ namespace Sharp.EndPoints
 
     public class TemplateFile : Attribute
     {
-        public string Filename { get; set; }
+        public string Filename { get; set; } 
 
         public TemplateFile(string fileName)
         {
-            Filename = fileName;
-        }
-    }
-
-
+            Filename = fileName; 
+        }  
+    } 
 
 }

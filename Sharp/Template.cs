@@ -18,9 +18,19 @@ namespace Sharp
 
     public class Template : Attribute
     {
+        private FileRepo _fileRepo { get; set; }
+        
+        public FileRepo fileRepo { get { 
+            if (_fileRepo == null)
+                _fileRepo = new  Cached();
+            return _fileRepo;
+        }
+            set { _fileRepo = value; }
+        }
+
         private String template;
         public Hashtable Tags { get; set; }
-        public const String TokenRegex = @"\[%(.*?)%\]|token=""(.*?)""|(""~/)"; // @"\[%(\w+)%\]|token=""(\w+)""|(""~/)"
+        public const String TokenRegex = @"\[%(.*?)%\]|token=""(.*?)""|(""~/)"; 
         private LocalFile Path { get; set; }
 
         public Template(String template)
@@ -28,20 +38,28 @@ namespace Sharp
             Tags = new Hashtable(10);
             this.template = template;
             ProcessIncludes();
-        }
-
-        public Template(LocalFile file)
-        {
-            Path = file;
-            Tags = new Hashtable(10);
-            template = Cached.GetFile(file.AbsolutePath);
-            ProcessIncludes();
-        }
+        } 
 
         public Template(String Template, Hashtable tags)
         {
             Tags = tags ?? new Hashtable(10);
             template = Template;
+            ProcessIncludes();
+        }
+
+        public Template(LocalFile file, FileRepo caching)  { 
+            Path = file;
+            Tags = new Hashtable(10);
+            fileRepo = caching;
+            template = _fileRepo.ReadFile(file.AbsolutePath);
+            ProcessIncludes();
+        } 
+
+        public Template(LocalFile file)
+        {
+            Path = file;
+            Tags = new Hashtable(10); 
+            template = fileRepo.ReadFile(file.AbsolutePath);
             ProcessIncludes();
         }
 
@@ -69,8 +87,6 @@ namespace Sharp
 
             return this;
         }
-
-
 
 
         /// <summary> Append to a tag (is optimized for recursive concat), allows appending to non-existent tag.    </summary>
@@ -172,7 +188,7 @@ namespace Sharp
 
         private string GetMessage(string tagname)
         {
-            return String.IsNullOrEmpty((String)Tags[tagname]) ? "" : Cached.GetFile("/a/msg/" + tagname + ".htm").Replace("[%" + tagname.ToLower() + "%]", Tags[tagname].ToString());
+            return String.IsNullOrEmpty((String)Tags[tagname]) ? "" : _fileRepo.ReadFile("/a/msg/" + tagname + ".htm").Replace("[%" + tagname.ToLower() + "%]", Tags[tagname].ToString());
         }
 
         private Boolean flag { get; set; }
@@ -196,7 +212,7 @@ namespace Sharp
             String path = token.Groups[1].Value.ToLower();
             if (Path != null && path.IndexOf("./") == 0)
                 path = System.IO.Path.GetDirectoryName(Path.AbsolutePath) + path;
-            return Cached.GetFile(path);
+            return _fileRepo.ReadFile(path);
         }
 
 
@@ -204,7 +220,7 @@ namespace Sharp
         /// <param name="absPath">Dont forget a leading /</param> 
         public Template AddInclude(String tag, String absPath)
         {
-            template = template.ReplaceEx("[%" + tag + "%]", Cached.GetFile(absPath));
+            template = template.ReplaceEx("[%" + tag + "%]", _fileRepo.ReadFile(absPath));
             return this;
         }
 

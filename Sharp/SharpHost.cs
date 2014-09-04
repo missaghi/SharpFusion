@@ -18,7 +18,7 @@ namespace Sharp
 
         private SharpHost()
         {
-            Assemblies = new HashSet<Assembly>();
+            Assemblies = new HashSet<Assembly>(); 
 
             
 

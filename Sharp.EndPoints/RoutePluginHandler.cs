@@ -17,8 +17,7 @@ namespace Sharp.EndPoints
             Endpoint attr;
             attr = (Endpoint)((MethodInfo)methodInfo).GetCustomAttributes(typeof(Endpoint), true)[0];
             routeBuilder.url = attr.Url;
-            routeBuilder.values.Add("verb", attr.Verb);
-            routeBuilder.values.Add("content-type", attr.Type); 
+            routeBuilder.dataTokens.Add("verb", attr.Verb);
 
             if (attr.Verb != Endpoint.HTTPVerb.ALL)
             {

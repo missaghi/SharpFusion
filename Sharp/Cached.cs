@@ -6,12 +6,17 @@ using System.IO;
 
 namespace Sharp
 {
-    public class Cached
-    {
+
+    public class FileRepo
+    { 
+        public static String GetFile(String file) {
+            return new FileRepo().ReadFile(file);
+        }
+
         /// <summary>Gets a file</summary>
         /// <param name="file">Virtual Path</param>
-        /// <returns></returns>
-        public static String GetFile(String file)
+        /// <returns></returns> 
+        public virtual String ReadFile(String file)
         {
             if (!file.Contains(":"))
                 file = HttpContext.Current.Server.MapPath(file);
@@ -36,6 +41,14 @@ namespace Sharp
                 HttpContext.Current.Cache.Add(key, whattocache(arg), null, DateTime.Now.AddDays(days), System.Web.Caching.Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.BelowNormal, null);
             }
             return (T)HttpContext.Current.Cache[key];
+        }
+    }
+
+    public class Cached : FileRepo
+    { 
+        public static String GetFile(String file)
+        {
+            return new Cached().ReadFile(file);
         }
 
         ///// <summary>
@@ -69,8 +82,6 @@ namespace Sharp
         //            }
         //            return (string[][])context.Cache["SP: " + StoredProc];
         //        }
-
-
 
     }
 

@@ -16,10 +16,9 @@ namespace Sharp.EndPoints
         public void RenderSitemap() {
             template = new Template(Resources<Sitemap>.Read["Sitemap.html"]);
 
-            foreach (var route in RouteTable.Routes)
+            foreach (Route route in RouteTable.Routes)
             {
-                dynamic expando = JSONHelper.ParseJSON<dynamic>(route.ToJSON());
-                template.Append("links", "<li><a href='/meta?url=" + ((string)expando.Url).ToURL() + "'>" + expando.Url + "</a>" + route.ToJSON() + "</li>");
+                template.Append("links", "<li><a href='/meta?url=" + route.Url.ToURL() + "'>" + route.Url + "</a>" + route.ToJSON() + "</li>");
             }
 
 

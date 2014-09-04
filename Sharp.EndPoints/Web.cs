@@ -14,7 +14,8 @@ namespace Sharp
         public FormWrapper Form { get { return new FormWrapper() { context = context }; } }
         public FormArrayWrapper FormArray { get { return new FormArrayWrapper() { context = context }; } }
         public QueryStringWrapper Query { get { return new QueryStringWrapper() { context = context }; } }
-        public RouteDataWrapper RouteDataValue { get { return new RouteDataWrapper() { context = context }; } }
+        public RouteDataWrapper RouteDataToken { get { return new RouteDataWrapper() { context = context }; } }
+        public RouteValuesWrapper RouteValue { get { return new RouteValuesWrapper() { context = context }; } }
 
         [DataMember]
         public StateBag sb
@@ -104,11 +105,28 @@ namespace Sharp
             {
                 get
                 {
+                    return _context.Request.RequestContext.RouteData.DataTokens[index] != null ? _context.Request.RequestContext.RouteData.DataTokens[index].ToString() : "";
+                }
+
+            }
+        }
+
+        public class RouteValuesWrapper
+        {
+            private HttpContext _context { get { return context ?? HttpContext.Current; } }
+            public HttpContext context { get; set; }
+
+            public String this[String index]
+            {
+                get
+                {
                     return _context.Request.RequestContext.RouteData.Values[index] != null ? _context.Request.RequestContext.RouteData.Values[index].ToString() : "";
                 }
 
             }
         }
+
+       
 
 
         public void Write(object Txt)
