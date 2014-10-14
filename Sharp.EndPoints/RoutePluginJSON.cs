@@ -22,6 +22,7 @@ namespace Sharp.EndPoints
             if (Query["callback"].NNOE())
             {
                 contentType = Endpoint.ContentType.JSONP;
+                context.Items["contentType"] = Endpoint.ContentType.JSONP;
             } 
         }
 
@@ -29,10 +30,11 @@ namespace Sharp.EndPoints
         {
             if (Query["callback"].NNOE())
             { 
-                this.data = Query["callback"].Else("jsonpcallback") + "(" + this.data.ToJSON() + ")";
+                //this.data = Query["callback"].Else("jsonpcallback") + "(" + this.ToJSON() + ")";
             }
 
             base.Dispose();
+             
         }
 
     }

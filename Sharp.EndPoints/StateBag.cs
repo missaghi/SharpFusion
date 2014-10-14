@@ -5,7 +5,8 @@ using System.Text.RegularExpressions;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Web;
-using System.Transactions; 
+using System.Transactions;
+using System.Collections; 
 
 namespace Sharp
 {
@@ -18,10 +19,31 @@ namespace Sharp
     public class StateBag
     {
 
+        public static StateBag Current
+        {
+            get
+            {
+                IDictionary items = HttpContext.Current.Items;
+                if (!items.Contains("StateBag"))
+                {
+                    items["StateBag"] = new StateBag();
+                }
+                return (StateBag)items["StateBag"];
+            }
+            set
+            {
+                IDictionary items = HttpContext.Current.Items; 
+                items["StateBag"] = value;
+            }
+        }
+
         public TransactionScope Tn { get; set; }
 
         [DataMember]
         public Boolean Valid { get; set; }
+
+        [DataMember]
+        public Boolean SecurityViolation { get; set; }
 
         [DataMember]
         public String[] Required { get; set; } 
@@ -43,9 +65,10 @@ namespace Sharp
             }
         }   
 
-        public StateBag()
+        private StateBag()
         {
-            Valid = true; 
+            Valid = true;
+            SecurityViolation = false; 
             errors = new List<string>();
             // Errors = new Dictionary<string, string>();
         }
@@ -55,6 +78,7 @@ namespace Sharp
             if (!Valid)
                 template.Error = ErrorMsg;
             Valid = true;
+            Valid = false;
             errors = new List<string>(); 
         }
 

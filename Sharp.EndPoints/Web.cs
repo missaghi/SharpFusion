@@ -8,7 +8,7 @@ namespace Sharp
 {
     [DataContract]
     public class Web
-    { 
+    {
         [IgnoreDataMember]
         public HttpContext context { get; set; }
         public FormWrapper Form { get { return new FormWrapper() { context = context }; } }
@@ -18,25 +18,15 @@ namespace Sharp
         public RouteValuesWrapper RouteValue { get { return new RouteValuesWrapper() { context = context }; } }
 
         [DataMember]
-        public StateBag sb
+        public static StateBag sb
         {
             get
-            {
-                IDictionary items = HttpContext.Current.Items;
-                if (!items.Contains("StateBag"))
-                {
-                    items["StateBag"] = new StateBag();
-                }
-                return (StateBag)items["StateBag"];
+            { 
+                return StateBag.Current;
             }
             set
             {
-                IDictionary items = HttpContext.Current.Items;
-                if (!items.Contains("StateBag"))
-                {
-                    items["StateBag"] = new StateBag();
-                }
-                items["StateBag"] = value;
+                StateBag.Current = value;
             }
         }
         public String[] UrlParts { get { return context.Request.UrlParts(); } }
@@ -44,18 +34,13 @@ namespace Sharp
 
 
 
-        public Web()
-        {
-
-            context = HttpContext.Current; 
-            sb = new StateBag();
-        }
+        public Web() : this(HttpContext.Current) {  }
 
         public Web(HttpContext _context)
         {
-            context = _context; 
-            sb = new StateBag();
+            context = _context;  
         }
+
         public class FormArrayWrapper
         {
             private HttpContext _context { get { return context ?? HttpContext.Current; } }

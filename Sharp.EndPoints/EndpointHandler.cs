@@ -49,8 +49,14 @@ namespace Sharp.EndPoints
             context.Response.CacheControl = "no-cache";
 
             //if no content type is defined then pick one based on the request header: Accepted Type
-            if (contentType == Endpoint.ContentType.DEFAUT)
+            if (contentType == Endpoint.ContentType.DEFAULT)
+            {
                 contentType = (context.Request.AcceptTypes ?? (new string[] { })).Count(x => (x ?? "").LikeOne(new string[] { "application/json", "text/javascript" })) > 0 ? Endpoint.ContentType.JSON : Endpoint.ContentType.HTML;  // ((HttpHandler.ContentType)(RouteTable.Routes.GetRouteData((HttpContextBase)new HttpContextWrapper(context)).Values["content-type"] ?? HttpHandler.ContentType.HTML));
+                if (Query["callback"].NNOE())
+                    contentType = Endpoint.ContentType.JSONP;
+            }
+            
+            
             context.Response.ContentType = contentType.ToStringValue();
 
 
@@ -106,13 +112,13 @@ namespace Sharp.EndPoints
                 {
                     var missingparams = methodParameters.Where(x => !x.Name.LikeOne(dict.Select(y => y.Key).ToArray())).Select(x => x.ParameterType.ToString() + " " + x.Name).ToArray();
                     sb.Required = methodParameters.Where(x => !x.Name.LikeOne(dict.Select(y => y.Key).ToArray())).Select(x => x.Name).ToArray();
-                    if (contentType == Endpoint.ContentType.JSON)
+                    if (contentType == Endpoint.ContentType.JSON || contentType == Endpoint.ContentType.JSONP)
                     {
                         sb.ErrorMsg = "Missing " + (methodParameters.Length - dict.Count) + " required fields " + (context.IsDebuggingEnabled ? String.Join(", ", sb.Required) : "");
                     }
                     else
                     {
-                        throw new Exception("Missing " + (methodParameters.Length - dict.Count) + " parameters needed to invoke this method: \n\n" + String.Join("\n", missingparams) + "\n\n");
+                        throw new Exception("Missing " + (methodParameters.Length - dict.Count) + " parameters needed to invoke this method via " + contentType.ToString() + ": \n\n" + String.Join("\n", missingparams) + "\n\n");
                     }
                 }
             }
@@ -121,15 +127,17 @@ namespace Sharp.EndPoints
 
 
         public virtual void Dispose()
-        {
+        { 
+
             context.Response.Expires = 0;
             {
                 if (contentType == Endpoint.ContentType.JSON)
                 {
                     Write(this.data != null || SerializeEntireHandler ? this.ToJSON() : this.data.ToJSON());
                 }
-                else if (contentType == Endpoint.ContentType.JSONP)
+                else if (contentType == Endpoint.ContentType.JSONP || Query["callback"].NNOE())
                 {
+                    this.data = Query["callback"].Else("jsonpcallback") + "(" + this.ToJSON() + ")";
                     Write(this.data);
                 }
                 else if (contentType == Endpoint.ContentType.HTML)

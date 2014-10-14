@@ -7,6 +7,9 @@ using Sharp.EndPoints;
 
 namespace Example
 {
+    /// <summary>
+    /// Demo of the various route plugins
+    /// </summary>
     public class Demo : TemplateHandler
     {
         public Demo() { 
@@ -20,6 +23,19 @@ namespace Example
             template.Set("world", "Hi");
         }
 
+        [Endpoint("genKey")]
+        [TemplateFile("/views/aTemplate.html")]
+        public void TestEncryption()
+        {
+            var e = new Encryption();
+
+            template.Append("world", "Key:" + Encryption.ByteArrToString(e.Key));
+            template.Append("world", "<br>Vector:" + Encryption.ByteArrToString(e.Vector));
+        }
+
+        /// <summary>
+        /// Really cool summary here
+        /// </summary>
         [Endpoint("")]
         [TemplateFile("/views/aTemplate.html")]
         public void TestHome()

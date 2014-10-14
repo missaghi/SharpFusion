@@ -66,7 +66,7 @@ namespace Sharp.EndPoints
 
 
 
-            if (contentType == Endpoint.ContentType.HTML || contentType == Endpoint.ContentType.DEFAUT)
+            if (contentType == Endpoint.ContentType.HTML || contentType == Endpoint.ContentType.DEFAULT)
             {
                 if (template == null)
                     template = new Template(Resources<Error>.Read["Error.html"]);

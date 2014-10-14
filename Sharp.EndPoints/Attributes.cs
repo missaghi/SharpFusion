@@ -7,7 +7,7 @@ namespace Sharp.EndPoints
     public class Endpoint : Attribute
     {
         public string Url { get; set; }
-        public enum ContentType { [Description("text/html")] DEFAUT, [Description("text/html")] HTML, [Description("application/json")] JSON, [Description("application/javascript")] JSONP,[Description("application/javascript")] JAVASCRIPT }
+        public enum ContentType { [Description("text/html")] DEFAULT, [Description("text/html")] HTML, [Description("application/json")] JSON, [Description("application/javascript")] JSONP,[Description("application/javascript")] JAVASCRIPT }
         public enum HTTPVerb { POST, GET, DELETE, PUT,[Description("*")] ALL }
         public ContentType Type { get; set; }
         public HTTPVerb Verb { get; set; }
