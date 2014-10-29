@@ -7,12 +7,13 @@ using System.Web;
 
 namespace Sharp.EndPoints
 {
-    public class Error : TemplateHandler
+    public class Error : EndpointHandler
     {
         public Error() { }
 
 
-        [Endpoint("error")]
+        [EndPointPlugin("error")]
+        [TemplatePlugin]
         public void ErrorPage()
         {
             RenderError(context.ApplicationInstance);
@@ -60,18 +61,17 @@ namespace Sharp.EndPoints
         }
 
 
-        public override void ProcessHandler()
+        public void ProcessHandler()
         {
             SetHeaders();
 
 
-
-            if (contentType == Endpoint.ContentType.HTML || contentType == Endpoint.ContentType.DEFAULT)
+            if (AcceptType == ContentType.HTML.Description() || AcceptType == ContentType.DEFAULT.Description())
             {
-                if (template == null)
-                    template = new Template(Resources<Error>.Read["Error.html"]);
+                if (TemplatePlugin.current == null)
+                    TemplatePlugin.current = new Template(Resources<Error>.Read["Error.html"]);
 
-                template.Set("errors", sb.ErrorMsg);
+                TemplatePlugin.current.Set("errors", sb.ErrorMsg);
             }
 
         }

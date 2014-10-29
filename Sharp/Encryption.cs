@@ -7,7 +7,9 @@ using System.Reflection;
 
 namespace Sharp
 {
-
+    /// <summary>
+    /// Default usage creates a key.config file with a new random Key and InitVector in the application root. Don't lose this file or you won't be able to decrypt data.
+    /// </summary>
     public class Encryption
     {
         public byte[] Key { get; set; }  //32 byte
@@ -42,17 +44,7 @@ namespace Sharp
         }
 
 
-        static private string AssemblyDirectory
-        {
-            get
-            {
-                string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-                UriBuilder uri = new UriBuilder(codeBase);
-                string path = LocalFile.UnescapeDataString(uri.Path);
-                //return Path.GetDirectoryName(path);
-                return AppDomain.CurrentDomain.BaseDirectory;
-            }
-        }
+        
          
 
         /// <summary>
@@ -60,7 +52,7 @@ namespace Sharp
         /// </summary>
         public Encryption()
         {
-            string KeyPath = Path.GetDirectoryName(AssemblyDirectory) + "/key.config";
+            string KeyPath = Path.GetDirectoryName(Utility.AssemblyDirectory) + "/key.config";
             if (File.Exists(KeyPath))
             {
                 BinaryReader sr = new BinaryReader(File.OpenRead(KeyPath));

@@ -44,22 +44,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyParser.cs" />
     <Compile Include="DocsByReflection.cs" />
+    <Compile Include="EndPointPlugin.cs" />
     <Compile Include="Error.cs" />
     <Compile Include="Meta.cs" />
-    <Compile Include="RoutePluginSecure.cs" />
-    <Compile Include="RoutePluginHandler.cs" />
     <Compile Include="RouteParser.cs" />
-    <Compile Include="Attributes.cs" />
     <Compile Include="EndpointHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RoutePluginSharedTemplate.cs" />
+    <Compile Include="SecurePlugin.cs" />
+    <Compile Include="SharpHost.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Sitemap.cs" />
     <Compile Include="StateBag.cs" />
-    <Compile Include="RoutePluginTemplate.cs" />
     <Compile Include="SharedRepo.cs" />
+    <Compile Include="TemplatePlugin.cs" />
     <Compile Include="Web.cs" />
-    <Compile Include="RoutePluginJSON.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sharp\Sharp.csproj">

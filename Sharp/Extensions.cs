@@ -619,7 +619,7 @@ namespace Sharp
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static string ToStringValue(this Enum value)
+        public static string Description(this Enum value)
         {
             FieldInfo fi = value.GetType().GetField(value.ToString());
             DescriptionAttribute[] attributes = (DescriptionAttribute[])fi.GetCustomAttributes(typeof(DescriptionAttribute), false);
@@ -638,7 +638,7 @@ namespace Sharp
             string[] names = Enum.GetNames(enumType);
             foreach (string name in names)
             {
-                if (ToStringValue((Enum)Enum.Parse(enumType, name)).Equals(value))
+                if (Description((Enum)Enum.Parse(enumType, name)).Equals(value))
                 {
                     return Enum.Parse(enumType, name);
                 }

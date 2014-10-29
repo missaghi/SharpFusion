@@ -53,8 +53,6 @@
   <ItemGroup>
     <Compile Include="DynamicSQL.cs" />
     <Compile Include="Encryption.cs" />
-    <Compile Include="SharpHost.cs" />
-    <Compile Include="AssemblyParser.cs" />
     <Compile Include="Cached.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="ObjectActivator.cs" />

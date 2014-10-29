@@ -9,13 +9,14 @@ using System.Web.Routing;
 
 namespace Sharp.EndPoints
 {
-    public class Meta : TemplateHandler
+    public class Meta : EndpointHandler
     {
-        [Endpoint("meta")]
+        [EndPointPlugin("meta")]
+        [TemplatePlugin]
         public void TestMethod(string url) { 
 
 
-            Endpoint endpoint = FindEndpoint(url);
+            EndPointPlugin endpoint = FindEndpoint(url);
             if (endpoint != null)
             {
                 RenderTestForm(endpoint);
@@ -25,16 +26,16 @@ namespace Sharp.EndPoints
         private Type handlerType { get; set; }
         private MethodInfo methodInfo { get; set; }
 
-        public void RenderTestForm(Endpoint endpoint)
+        public void RenderTestForm(EndPointPlugin endpoint)
         {
-            this.contentType = Endpoint.ContentType.HTML;
+            this.AcceptType = ContentType.HTML.Description();
             //gen test form
             StringBuilder sb = new StringBuilder();
-            template = new Template(Resources<Meta>.Read["Meta.html"]);
+            TemplatePlugin.current = new Template(Resources<Meta>.Read["Meta.html"]);
 
             String Field = @"<label>{0}</label>{1}<br /><input name=""{0}"" placeholder=""{2}"" value=""[%{0}%]"" /><br />";
 
-            template.Set("RequestType", endpoint.Verb.ToString()); 
+            TemplatePlugin.current.Set("RequestType", endpoint.Verb.ToString()); 
 
 
             if (methodInfo != null)
@@ -43,28 +44,28 @@ namespace Sharp.EndPoints
                 {
                     sb.AppendFormat(Field, parms.Name, parms.IsOptional ? " - Optional, default (" + parms.DefaultValue.ToString() + ")" : "", parms.DefaultValue ?? "");
                 }
-                template.ReplaceTag("fields", sb.ToString());
+                TemplatePlugin.current.ReplaceTag("fields", sb.ToString());
             }
             else
             {  
-                foreach (Object attr in handlerType.GetCustomAttributes(typeof(Endpoint), false))
+                foreach (Object attr in handlerType.GetCustomAttributes(typeof(EndPointPlugin), false))
                 {
                     //Gen Form Fields
-                    if (((Endpoint)attr).Parameters != null)
+                    if (((EndPointPlugin)attr).Parameters != null)
                     {
-                        foreach (String str in ((Endpoint)attr).Parameters)
+                        foreach (String str in ((EndPointPlugin)attr).Parameters)
                         {
                             sb.AppendFormat(Field, str);
                         }
-                        template.Set("fields", sb.ToString());
+                        TemplatePlugin.current.Set("fields", sb.ToString());
                     }
                 }
             }
         }
 
-        private Endpoint FindEndpoint(string url)
+        private EndPointPlugin FindEndpoint(string url)
         {
-            foreach (Assembly assembly in Sharp.SharpHost.Instance.Assemblies)
+            foreach (Assembly assembly in SharpHost.Instance.Assemblies)
             {
                 foreach (Type type in assembly.GetTypes())
                 {
@@ -73,9 +74,9 @@ namespace Sharp.EndPoints
                         // Method endpoint
                         foreach (var method in type.GetMethods())
                         {
-                            if (method.GetCustomAttributes(typeof(Endpoint), false).Length == 1)
+                            if (method.GetCustomAttributes(typeof(EndPointPlugin), false).Length == 1)
                             {
-                                Endpoint endpoint = ((Endpoint)method.GetCustomAttributes(typeof(Endpoint), false)[0]);
+                                EndPointPlugin endpoint = ((EndPointPlugin)method.GetCustomAttributes(typeof(EndPointPlugin), false)[0]);
                                 if (endpoint.Url.Like(url))
                                 {
                                     handlerType = type;

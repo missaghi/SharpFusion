@@ -9,39 +9,61 @@ using System.Configuration;
 using System.Web.Routing;
 using System.Runtime.Serialization;
 using Sharp;
+using System.ComponentModel;
 
 namespace Sharp.EndPoints
-{ 
+{
+
+    public enum ContentType { [Description("text/html")] DEFAULT, [Description("text/html")] HTML, [Description("application/json")] JSON, [Description("application/javascript")] JSONP,[Description("application/javascript")] JAVASCRIPT }
+
 
     [DataContract]
     public abstract class EndpointHandler : Web, IDisposable, IHttpHandler
     {
         [DataMember]
         public object data { get; set; }
-          
+
+        public List<Action<EndpointHandler>> ProcessHandlers { get; set; }
+        public List<Action<EndpointHandler>> DisposeHandlers { get; set; }
+        public Dictionary<String, Func<EndpointHandler, String>> ContentTypeHandlers { get; set; }
+
         private String path { get; set; }
-        public Endpoint.ContentType contentType { get; set; }
-        private Endpoint.HTTPVerb verb { get; set; }
+        public string AcceptType { get; set; }
+
+        private EndPointPlugin.HTTPVerb verb { get; set; }
 
         public MethodInfo method { get; set; }
         public object handlerChildInstance { get; set; } 
 
-        public bool SerializeEntireHandler = true;  
+        public bool SerializeEntireHandler = true;   
 
         public bool IsReusable
         { get { return false; } }
-        
-        public abstract void ProcessHandler();
+
+        public EndpointHandler() {
+            ProcessHandlers = new List<Action<EndpointHandler>>();
+            DisposeHandlers = new List<Action<EndpointHandler>>();
+            ContentTypeHandlers = new Dictionary<string, Func<EndpointHandler, String>>();
+        }
 
         public virtual void ProcessRequest(HttpContext context)
         {
+            if (!context.Request.AcceptTypes.Any(x=> ContentTypeHandlers.Keys.Any(y=> y.Like(x))))
+            {
+                AcceptType = ContentType.DEFAULT.Description();
+            }
+
             SetHeaders();
-            
-            InvokeMethod(); 
 
-            ProcessHandler();
+            ProcessHandlers.ForEach(x => x(this)); 
 
-            Dispose();
+            InvokeMethod();
+
+            DisposeHandlers.ForEach(x => x(this));
+ 
+            Dispose();   
+
+            context.Response.End();
         }
 
         public void SetHeaders()
@@ -49,20 +71,20 @@ namespace Sharp.EndPoints
             context.Response.CacheControl = "no-cache";
 
             //if no content type is defined then pick one based on the request header: Accepted Type
-            if (contentType == Endpoint.ContentType.DEFAULT)
+            if (AcceptType == ContentType.DEFAULT.Description())
             {
-                contentType = (context.Request.AcceptTypes ?? (new string[] { })).Count(x => (x ?? "").LikeOne(new string[] { "application/json", "text/javascript" })) > 0 ? Endpoint.ContentType.JSON : Endpoint.ContentType.HTML;  // ((HttpHandler.ContentType)(RouteTable.Routes.GetRouteData((HttpContextBase)new HttpContextWrapper(context)).Values["content-type"] ?? HttpHandler.ContentType.HTML));
+                AcceptType = (context.Request.AcceptTypes ?? (new string[] { })).Count(x => (x ?? "").LikeOne(new string[] { "application/json", "text/javascript" })) > 0 ? ContentType.JSON.Description() : ContentType.HTML.Description();  
                 if (Query["callback"].NNOE())
-                    contentType = Endpoint.ContentType.JSONP;
+                    AcceptType = ContentType.JSONP.Description();
             }
-            
-            
-            context.Response.ContentType = contentType.ToStringValue();
+
+
+            context.Response.ContentType = AcceptType;
 
 
             try
             {
-                verb = RouteDataToken["verb"].Else("ALL").ToEnum<Endpoint.HTTPVerb>();   // ((Endpoint.HTTPVerb)(RouteTable.Routes.GetRouteData((HttpContextBase)new HttpContextWrapper(context)).Values["verb"] ?? Endpoint.HTTPVerb.ALL));
+                verb = RouteDataToken["verb"].Else("ALL").ToEnum<EndPointPlugin.HTTPVerb>();   // ((Endpoint.HTTPVerb)(RouteTable.Routes.GetRouteData((HttpContextBase)new HttpContextWrapper(context)).Values["verb"] ?? Endpoint.HTTPVerb.ALL));
             }
             catch (Exception e)
             {
@@ -112,63 +134,62 @@ namespace Sharp.EndPoints
                 {
                     var missingparams = methodParameters.Where(x => !x.Name.LikeOne(dict.Select(y => y.Key).ToArray())).Select(x => x.ParameterType.ToString() + " " + x.Name).ToArray();
                     sb.Required = methodParameters.Where(x => !x.Name.LikeOne(dict.Select(y => y.Key).ToArray())).Select(x => x.Name).ToArray();
-                    if (contentType == Endpoint.ContentType.JSON || contentType == Endpoint.ContentType.JSONP)
+                    if (AcceptType == ContentType.JSON.Description() || AcceptType == ContentType.JSONP.Description())
                     {
                         sb.ErrorMsg = "Missing " + (methodParameters.Length - dict.Count) + " required fields " + (context.IsDebuggingEnabled ? String.Join(", ", sb.Required) : "");
                     }
                     else
                     {
-                        throw new Exception("Missing " + (methodParameters.Length - dict.Count) + " parameters needed to invoke this method via " + contentType.ToString() + ": \n\n" + String.Join("\n", missingparams) + "\n\n");
+                        throw new Exception("Missing " + (methodParameters.Length - dict.Count) + " parameters needed to invoke this method via " + AcceptType + ": \n\n" + String.Join("\n", missingparams) + "\n\n");
                     }
                 }
             }
-        }  
+        }
 
 
 
         public virtual void Dispose()
-        { 
+        {
 
             context.Response.Expires = 0;
+
+            if (AcceptType == ContentType.JSON.Description())
             {
-                if (contentType == Endpoint.ContentType.JSON)
+                Write(this.data != null || SerializeEntireHandler ? this.ToJSON() : this.data.ToJSON());
+            }
+            else if (AcceptType == ContentType.JSONP.Description())
+            {
+                this.data = Query["callback"].Else("jsonpcallback") + "(" + this.ToJSON() + ")";
+                Write(this.data);
+            }
+            else if (AcceptType == ContentType.HTML.Description())
+            {
+                if (this != null)
                 {
-                    Write(this.data != null || SerializeEntireHandler ? this.ToJSON() : this.data.ToJSON());
-                }
-                else if (contentType == Endpoint.ContentType.JSONP || Query["callback"].NNOE())
-                {
-                    this.data = Query["callback"].Else("jsonpcallback") + "(" + this.ToJSON() + ")";
-                    Write(this.data);
-                }
-                else if (contentType == Endpoint.ContentType.HTML)
-                {
-                    if (this != null)
+                    if (this.data == null)
                     {
-                        if (this.data == null)
-                        {
-                            foreach (string error in sb.Errors)
-                                Write(error);
-                        }
-                        else if (this.data.GetType() == typeof(String))
-                        {
-                            Write(this.data);
-                        }
-                        else
-                        {
-                            Write(this.data == null || SerializeEntireHandler ? this.ToJSON() : this.data.ToJSON()); //if it's an object and not a string then serialize it even though it's requesting html
-                        }
+                        foreach (string error in sb.Errors)
+                            Write(error);
+                    }
+                    else if (this.data.GetType() == typeof(String))
+                    {
+                        Write(this.data);
+                    }
+                    else
+                    {
+                        Write(this.data == null || SerializeEntireHandler ? this.ToJSON() : this.data.ToJSON()); //if it's an object and not a string then serialize it even though it's requesting html
                     }
                 }
-                else
-                { //serialize to XML ;
-                    throw new Exception("content type not implemented");
-                }
+            }
+            else
+            { //serialize to XML ;
+                throw new Exception("content type not implemented");
             }
 
             if (sb.Tn != null)
                 sb.Tn.Dispose();
-                 
-                context.Response.End();
+
+
 
         }
     }
