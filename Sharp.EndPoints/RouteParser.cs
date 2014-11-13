@@ -54,7 +54,8 @@ namespace Sharp.EndPoints
                     { 
 
                         Type methodEndpointType = (typeof(MethodEndpoint<>).MakeGenericType(new Type[] { type }));
-                        routehandler = Instantiator.NewUpType<MethodEndpoint>(methodEndpointType); 
+                        routehandler = (MethodEndpoint)methodEndpointType.GetInstance();
+                        
                         routehandler.methodInfo = method;
 
                         var routeData = new RouteData(); 

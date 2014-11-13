@@ -22,6 +22,12 @@ namespace Example
         {
             TemplatePlugin.current.Set("world", "Hi");
         }
+        [EndPointPlugin("testDate")]
+        [TemplatePlugin("/views/aTemplate.html")]
+        public void TestEndpoint(DateTime test)
+        {
+            TemplatePlugin.current.Set("world", test.ToLongDateString());
+        }
 
         [EndPointPlugin("genKey")]
         [TemplatePlugin("/views/aTemplate.html")]

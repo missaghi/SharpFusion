@@ -71,7 +71,7 @@ namespace Sharp.EndPoints
             context.Response.CacheControl = "no-cache";
 
             //if no content type is defined then pick one based on the request header: Accepted Type
-            if (AcceptType == ContentType.DEFAULT.Description())
+            if (AcceptType == null || AcceptType == ContentType.DEFAULT.Description())
             {
                 AcceptType = (context.Request.AcceptTypes ?? (new string[] { })).Count(x => (x ?? "").LikeOne(new string[] { "application/json", "text/javascript" })) > 0 ? ContentType.JSON.Description() : ContentType.HTML.Description();  
                 if (Query["callback"].NNOE())
@@ -112,7 +112,7 @@ namespace Sharp.EndPoints
                             }
                             catch (Exception e)
                             {
-                                sb.ErrorMsg = methodParam.Name + " is not the right format";
+                                sb.ErrorMsg = methodParam.Name + " is not the right format:" + e.InnerException.Message;
                             }
 
                         }

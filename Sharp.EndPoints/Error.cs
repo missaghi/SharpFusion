@@ -58,6 +58,8 @@ namespace Sharp.EndPoints
             ProcessHandler();
             //data = template.ToString();
             Dispose();
+
+            context.Response.End();
         }
 
 
