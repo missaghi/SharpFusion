@@ -25,26 +25,22 @@ namespace Sharp.EndPoints
 
         public void PreInitAction(System.Web.Routing.RequestContext requestContext)
         {
-            var context = HttpContext.Current;
-            Secure secure = (Secure)requestContext.RouteData.DataTokens["SecureArea"];
-
-            if (secure != null)
+            var context = HttpContext.Current; 
+            if (!context.User.Identity.IsAuthenticated)
             {
-                if (!context.User.Identity.IsAuthenticated)
+                StateBag.Current.SecurityViolation = true;
+                throw new Exception("this method requires authentication to run");
+            }
+
+            if (Roles.Length > 0)
+            {
+                if (!Roles.Any(x => context.User.IsInRole(x)))
                 {
                     StateBag.Current.SecurityViolation = true;
-                    throw new Exception("this method requires authentication to run");
-                }
-
-                if (secure.Roles.Length > 0)
-                {
-                    if (!secure.Roles.Any(x => context.User.IsInRole(x)))
-                    {
-                        StateBag.Current.SecurityViolation = true;
-                        throw new Exception("You must be a member of one of these roles to run this method: " + string.Join(",", secure.Roles));
-                    }
+                    throw new Exception("You must be a member of one of these roles to run this method: " + string.Join(",", Roles));
                 }
             }
+             
         }
 
         public void ProcessHandler(EndpointHandler endPointHandler)

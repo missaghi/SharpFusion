@@ -10,6 +10,7 @@ using System.Collections.Generic;
 //using System.Web.Script.Serialization;
 using System.Reflection;
 using System.ComponentModel;
+using System.Dynamic;
 
 
 namespace Sharp
@@ -31,10 +32,21 @@ namespace Sharp
         }
     }
 
+    public static class DynamicExtensions
+    {
+        public static dynamic ToDynamic(this object value)
+        {
+            IDictionary<string, object> expando = new ExpandoObject();
+
+            foreach (PropertyDescriptor property in TypeDescriptor.GetProperties(value.GetType()))
+                expando.Add(property.Name, property.GetValue(value));
+
+            return expando as ExpandoObject;
+        }
+    }
 
     public static partial class Extensions
     {
-
 
         //nullabel friendly
         public static string ToString(this DateTime? obj, String param)
