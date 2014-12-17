@@ -28,7 +28,14 @@ namespace Sharp.EndPoints
                     if (context.IsDebuggingEnabled)
                         sb.ErrorMsg = ("error" + ": " + err);
                     else
-                        sb.ErrorMsg = ("error" + ": " + err.Message);
+                    {
+                        string error = err.Message;
+
+                        if (err.InnerException != null)
+                            error += err.InnerException.Message;
+
+                        sb.ErrorMsg = ("error" + ": " + error);
+                    }
 
                 }
              

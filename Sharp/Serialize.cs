@@ -38,7 +38,7 @@ namespace Sharp
                 //ms.Close();
                 //return obj;
 
-                if (!json.StartsWith("{") && !json.StartsWith("\""))
+                if (!json.StartsWith("{") && !json.StartsWith("\"") && !json.StartsWith("["))
                     json = "\"" + json + "\"";
 
                 return JsonConvert.DeserializeObject<T>(json, new Newtonsoft.Json.JsonConverter[] { }); // new FieldConverter<T>() });

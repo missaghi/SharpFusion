@@ -18,7 +18,7 @@ namespace Sharp.EndPoints
         {
             Roles = new string[] { Role };
         }
-        public Secure(string[] Roles)
+        public Secure(params string[] Roles)
         {
             this.Roles = Roles;
         } 

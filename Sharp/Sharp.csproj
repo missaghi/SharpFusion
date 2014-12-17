@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="base62.cs" />
     <Compile Include="DynamicSQL.cs" />
     <Compile Include="Encryption.cs" />
     <Compile Include="Cached.cs" />
