@@ -46,21 +46,22 @@
   <ItemGroup>
     <Compile Include="AssemblyParser.cs" />
     <Compile Include="DocsByReflection.cs" />
-    <Compile Include="EndPointPlugin.cs" />
-    <Compile Include="Error.cs" />
-    <Compile Include="Meta.cs" />
+    <Compile Include="plugins\EndPointPlugin.cs" />
+    <Compile Include="handlers\Error.cs" />
+    <Compile Include="handlers\Meta.cs" />
     <Compile Include="RouteParser.cs" />
-    <Compile Include="EndpointHandler.cs" />
+    <Compile Include="handlerClasses\EndpointHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SecurePlugin.cs" />
+    <Compile Include="plugins\SecurePlugin.cs" />
     <Compile Include="SharpHost.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Sitemap.cs" />
-    <Compile Include="StateBag.cs" />
+    <Compile Include="handlers\Sitemap.cs" />
+    <Compile Include="handlerClasses\StateBag.cs" />
     <Compile Include="SharedRepo.cs" />
-    <Compile Include="TemplatePlugin.cs" />
-    <Compile Include="Web.cs" />
+    <Compile Include="plugins\TemplatePlugin.cs" />
+    <Compile Include="TypeParser.cs" />
+    <Compile Include="handlerClasses\Web.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sharp\Sharp.csproj">
@@ -69,14 +70,15 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Sitemap.html" />
+    <EmbeddedResource Include="handlers\Sitemap.html" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Meta.html" />
+    <EmbeddedResource Include="handlers\Meta.html" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Error.html" />
+    <EmbeddedResource Include="handlers\Error.html" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

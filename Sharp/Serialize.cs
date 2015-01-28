@@ -8,6 +8,8 @@ using System.Runtime.Serialization.Json;
 using System.IO;
 using System.Text; 
 using Newtonsoft.Json;
+using System.Dynamic;
+using Newtonsoft.Json.Converters;
 
 namespace Sharp
 {
@@ -22,7 +24,7 @@ namespace Sharp
             //return retVal;
 
             return   JsonConvert.SerializeObject(obj, Formatting.Indented);
-        }
+        }  
 
         public static T ParseJSON<T>(this string json)
         {
@@ -41,7 +43,10 @@ namespace Sharp
                 if (!json.StartsWith("{") && !json.StartsWith("\"") && !json.StartsWith("["))
                     json = "\"" + json + "\"";
 
-                return JsonConvert.DeserializeObject<T>(json, new Newtonsoft.Json.JsonConverter[] { }); // new FieldConverter<T>() });
+                if (typeof(T).Equals(typeof(ExpandoObject)))
+                    return JsonConvert.DeserializeObject<T>(json,  new ExpandoObjectConverter() ); // new FieldConverter<T>() });
+                else
+                    return JsonConvert.DeserializeObject<T>(json,   new Newtonsoft.Json.JsonConverter[] { }); // new FieldConverter<T>() });
             }
         }
     }

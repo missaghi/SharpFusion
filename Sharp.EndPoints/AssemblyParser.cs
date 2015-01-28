@@ -6,11 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Sharp.EndPoints
-{ 
-    public interface TypeParser
-    {
-        void ParseType(Type type);
-    } 
+{  
 
     public class AssemblyParser
     {
@@ -18,12 +14,12 @@ namespace Sharp.EndPoints
 
         public AssemblyParser() { assemblies = new Dictionary<Assembly, List<TypeParser>>(); }
 
-        public void AddAssemblyParsers(Assembly assembly)  
+        public void AddAssembly(Assembly assembly)  
         {
-            AddAssemblyParsers(assembly, new RouteParser());
+            AddAssemblyWithParser(assembly, null);
         }
 
-        public void AddAssemblyParsers(Assembly assembly, params TypeParser[] parsers)
+        public void AddAssemblyWithParser(Assembly assembly, params TypeParser[] parsers)
         {
             if (!assemblies.Keys.Contains(assembly))
             {
@@ -31,7 +27,16 @@ namespace Sharp.EndPoints
                 assemblies.Add(assembly, new List<TypeParser>());
             }
 
-            assemblies[assembly].AddRange(parsers.ToList());
+            if (parsers != null)
+             assemblies[assembly].AddRange(parsers);
+        }
+
+        public void AddGlobalParsers(params TypeParser[] parsers)
+        {
+            foreach (var assembly in assemblies) {
+                var newParsers = parsers.Where(x => !assembly.Value.Any(v => v.GetType() == x.GetType()));
+                assembly.Value.AddRange(newParsers);
+            }
         }
 
 

@@ -39,11 +39,10 @@ namespace Sharp.EndPoints
     }
 
     public class RouteParser : TypeParser
-    {
-        public Type type { get; set; }
+    { 
         public MethodEndpoint routehandler { get; set; } 
 
-        public void ParseType(Type _type)
+        public override void ParseType(Type _type)
         {
             type = _type;
             if (typeof(IHttpHandler).IsAssignableFrom(type))

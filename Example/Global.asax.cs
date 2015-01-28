@@ -16,9 +16,11 @@ namespace Example
         { 
             var app = new AssemblyParser();
 
-            app.AddAssemblyParsers(typeof(Sharp.EndPoints.Sitemap).Assembly);
-            app.AddAssemblyParsers(typeof(Global).Assembly);
+            app.AddAssembly(typeof(Sharp.EndPoints.Sitemap).Assembly);
+            app.AddAssembly(typeof(Global).Assembly);
             
+            app.AddGlobalParsers(new RouteParser());
+
             app.Parse();
         }
 
@@ -39,8 +41,7 @@ namespace Example
 
         protected void Application_Error(object sender, EventArgs e)
         {
-            //replace TemplatePlugin.current file with your own
-            TemplatePlugin.current = new Template(Resources<Sharp.EndPoints.Error>.Read["Error.html"]);
+            //replace TemplatePlugin.current file with your own 
             new Sharp.EndPoints.Error(sender, e);
         }
 

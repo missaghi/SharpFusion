@@ -16,6 +16,13 @@ namespace Example
             //code here will run before begin request
         }
 
+        [EndPointPlugin("testerror")]
+        public void TestError()
+        {
+            throw new Exception("test");
+        }
+
+
         [EndPointPlugin("TemplatePlugin.current")]
         [TemplatePlugin("/views/aTemplate.html")]
         public void TestEndpoint()
@@ -55,7 +62,6 @@ namespace Example
         {
             TemplatePlugin.current.Set("world", "homepage");
         }
-         
     } 
 
     public class JSONDemo : EndpointHandler
