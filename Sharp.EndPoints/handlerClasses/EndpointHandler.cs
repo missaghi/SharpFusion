@@ -139,7 +139,8 @@ namespace Sharp.EndPoints
                         {
                             if (context.Request.HttpMethod.Like("POST") && methodParameters.Count() == 1)
                             {
-                                value = RequestContent;
+                                if (RequestContent.Trim().IndexOf("{") == 0)
+                                    value = RequestContent;
                             } 
                         }
 
