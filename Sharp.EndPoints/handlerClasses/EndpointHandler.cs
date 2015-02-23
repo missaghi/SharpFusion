@@ -12,6 +12,9 @@ using Sharp;
 using System.ComponentModel;
 using System.IO;
 using System.Dynamic;
+using Newtonsoft.Json;
+using System.Reflection.Emit;
+using System.Threading;
 
 namespace Sharp.EndPoints
 {
@@ -132,7 +135,7 @@ namespace Sharp.EndPoints
                     foreach (var methodParam in methodParameters)
                     {
                         //check the post values, query values, route values
-                        string value = Form[methodParam.Name].Else(Query[methodParam.Name]).Else(RouteDataToken[methodParam.Name]);
+                        string value = Form[methodParam.Name].Else(Query[methodParam.Name]).Else(RouteDataToken[methodParam.Name]).Else(RouteValue[methodParam.Name]);
 
                         //if it's post and there is only one value, try and deseriazlise the whole request content
                         if (value.NOE())
@@ -140,12 +143,23 @@ namespace Sharp.EndPoints
                             if (context.Request.HttpMethod.Like("POST") && methodParameters.Count() == 1)
                             {
                                 if (RequestContent.Trim().IndexOf("{") == 0)
-                                    value = RequestContent;
+                                {
+                                    Dictionary<string, object> values = JsonConvert.DeserializeObject<Dictionary<string, object>>(RequestContent);
+
+                                    if (values.ContainsKey(methodParam.Name))
+                                    {
+                                        //there must be a better way that serializeing and deserailizing...
+                                        value = values[methodParam.Name].ToJSON();
+                                    }
+                                    else
+                                        value = RequestContent;
+
+                                }
                             } 
                         }
 
                         if (value.NNOE())
-                        {
+                        {   
                             try
                             {
                                 var newparm = typeof(JSONHelper).GetMethod("ParseJSON").MakeGenericMethod(new Type[] { methodParam.ParameterType }).Invoke(this, new Object[] { value });
@@ -154,7 +168,7 @@ namespace Sharp.EndPoints
                             catch (Exception e)
                             {
                                 throw new Exception(methodParam.Name + " is not the right format:" + e.InnerException.Message);
-                            }
+                            } 
 
                         }  
                         else if (methodParam.IsOptional)
