@@ -52,7 +52,7 @@ namespace Sharp.EndPoints
                         //summary = "no description found: " + e.Message;
                     } 
 
-                    TemplatePlugin.current.Append("links", "<div style=\"padding-left:10px; margin-left:10px; border-left:5px solid #ccc;\"><a href='/meta?url=" + route.Url.ToURL().Trim().Else("/") + "'>" + route.Url.Trim().Else("/") + "</a>\t\t" +
+                    TemplatePlugin.current.Append("links", "<div style=\"padding-left:10px; margin-left:10px; border-left:5px solid #ccc;\"><a href='./meta?url=" + route.Url.ToURL().Trim().Else("/") + "'>" + route.Url.Trim().Else("/") + "</a>\t\t" +
                         "<b>" + methodInfo.Name + "</b>(" +
                         string.Join(",", methodInfo.GetParameters().Select(x => "<i>" + x.ParameterType.ToString() + "</i> <b>" + x.Name + "</b>" + (x.IsOptional ? " = " + x.DefaultValue : "")).ToArray())
                         + ") returns <i>" + methodInfo.ReturnType.ToString() + "</i><p style=\"color:#999; font-size:smaller; margin-top:0;\">"+ summary +"</p></div>");

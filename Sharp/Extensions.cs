@@ -269,6 +269,11 @@ namespace Sharp
             return HttpUtility.UrlDecode(str);
         }
 
+        /// <summary>
+        /// Turns: "true", "y", "yes", "ok", "1", "on" to true and everything else to false;
+        /// </summary>
+        /// <param name="yn"></param>
+        /// <returns></returns>
         public static Boolean ToBool(this string yn)
         {
             String[] TrueValues = new String[] { "true", "y", "yes", "ok", "1", "on" };
