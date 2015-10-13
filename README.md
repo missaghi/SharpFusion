@@ -1,3 +1,9 @@
+SharpFusion
+------------------
+A simple web framework for service oriented architectures, with a  page template, and ORM.
+
+Nuget: https://www.nuget.org/packages/Sharp/
+
 The framework consists of 4 major parts: The SQL generator, the Data Access Layer, the Templating System, and automatic url end-point mapping to eliminate the need for runtime reflection.
 
 Usage Guides:
