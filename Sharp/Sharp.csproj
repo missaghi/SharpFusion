@@ -57,6 +57,7 @@
     <Compile Include="Encryption.cs" />
     <Compile Include="Cached.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Extentions\CollectionExtentions.cs" />
     <Compile Include="ObjectActivator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.cs" />

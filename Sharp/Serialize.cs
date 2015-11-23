@@ -44,9 +44,22 @@ namespace Sharp
                     json = "\"" + json + "\"";
 
                 if (typeof(T).Equals(typeof(ExpandoObject)))
-                    return JsonConvert.DeserializeObject<T>(json,  new ExpandoObjectConverter() ); // new FieldConverter<T>() });
+                    return JsonConvert.DeserializeObject<T>(json, new ExpandoObjectConverter()); // new FieldConverter<T>() });
+                else if (typeof(T).Equals(typeof(DateTime)))
+                {
+                    if (json.IndexOf("(") > -1)
+                        json = json.Substring(0, json.IndexOf("("));
+
+                    DateTime date;
+                    if (DateTime.TryParse(json, out date))
+                        return (T)(object)date;
+                    else if (DateTime.TryParseExact(json, "ddd MMM dd yyyy h:mm:ss tt zzz", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out date))
+                        return (T)(object)date;
+                    else
+                        return JsonConvert.DeserializeObject<T>(json, new Newtonsoft.Json.JsonConverter[] { });        
+                }
                 else
-                    return JsonConvert.DeserializeObject<T>(json,   new Newtonsoft.Json.JsonConverter[] { }); // new FieldConverter<T>() });
+                    return JsonConvert.DeserializeObject<T>(json, new Newtonsoft.Json.JsonConverter[] { }); // new FieldConverter<T>() });
             }
         }
     }

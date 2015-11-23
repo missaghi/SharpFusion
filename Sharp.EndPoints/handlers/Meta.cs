@@ -42,7 +42,7 @@ namespace Sharp.EndPoints
             {
                 foreach (var parms in methodInfo.GetParameters())
                 {
-                    sb.AppendFormat(Field, parms.Name, parms.IsOptional ? " - Optional, default (" + parms.DefaultValue.ToString() + ")" : "", parms.DefaultValue ?? "");
+                    sb.AppendFormat(Field, parms.Name, parms.IsOptional ? " - Optional, default (" + (parms.DefaultValue ?? "").ToString() + ")" : "", parms.DefaultValue ?? "");
                 }
                 TemplatePlugin.current.ReplaceTag("fields", sb.ToString());
             }

@@ -93,7 +93,10 @@ namespace Sharp.EndPoints
 
         public void SetHeaders()
         {
-            context.Response.CacheControl = "no-cache";  
+            context.Response.CacheControl = "no-cache";
+
+            if (context.Request.AcceptTypes == null || context.Request.AcceptTypes.Length == 0)
+                //throw new Exception("Missing Accept header");
 
             try
             {
@@ -108,7 +111,7 @@ namespace Sharp.EndPoints
                         if (context.Request.AcceptTypes != null && context.Request.AcceptTypes.Length > 0)
                             AcceptType = context.Request.AcceptTypes[0];
                         else
-                            AcceptType = ContentType.DEFAULT.Description();
+                            AcceptType = ContentType.JSON.Description();
                     }
                 }
                 else
@@ -118,7 +121,7 @@ namespace Sharp.EndPoints
             }
             catch (Exception e)
             {
-                throw new Exception("Handler can't get route data:" + e.Message);
+                throw new Exception("Handler can't get route data:" + e.ToString());
             }
         }
 
@@ -130,7 +133,23 @@ namespace Sharp.EndPoints
 
                 Dictionary<string, object> parameters = new Dictionary<string, object>();
                 var methodParameters = method.GetParameters();
-                {  
+                {
+
+                    Dictionary<string, object> values = new Dictionary<string, object>();
+
+                    if (RequestContent.Trim().IndexOf("{") == 0)
+                    { 
+                        try
+                        {
+                            values = JsonConvert.DeserializeObject<Dictionary<string, object>>(RequestContent);
+                        }
+                        catch (Exception e)
+                        {
+                            throw new Exception("Request deserialization error: " + e.Message + ": " + RequestContent, e);
+                        }
+                    }
+
+
                     //Spin through all of the parameters on the method and see if you can find matches in the request
                     foreach (var methodParam in methodParameters)
                     {
@@ -140,20 +159,26 @@ namespace Sharp.EndPoints
                         //if it's post and there is only one value, try and deseriazlise the whole request content
                         if (value.NOE())
                         {
-                            if (context.Request.HttpMethod.Like("POST") && methodParameters.Count() == 1)
-                            {
-                                if (RequestContent.Trim().IndexOf("{") == 0)
-                                {
-                                    Dictionary<string, object> values = JsonConvert.DeserializeObject<Dictionary<string, object>>(RequestContent);
-
+                            if (context.Request.HttpMethod.Like("POST") && RequestContent.Trim().IndexOf("{") == 0)
+                            { 
+                                if (methodParameters.Count() == 1)
+                                { 
                                     if (values.ContainsKey(methodParam.Name))
                                     {
                                         //there must be a better way that serializeing and deserailizing...
-                                        value = values[methodParam.Name].ToJSON();
+                                        value = values[methodParam.Name].GetType() == typeof(String) ? (String)values[methodParam.Name] : values[methodParam.Name].ToJSON();
                                     }
                                     else
                                         value = RequestContent;
 
+                                }
+                                else
+                                {
+                                    if (values.ContainsKey(methodParam.Name))
+                                    {
+                                        //there must be a better way that serializeing and deserailizing...
+                                        value = values[methodParam.Name].GetType() == typeof(String) ? (String)values[methodParam.Name] : values[methodParam.Name].ToJSON();
+                                    }
                                 }
                             } 
                         }
@@ -162,6 +187,7 @@ namespace Sharp.EndPoints
                         {   
                             try
                             {
+                                //parse it to it's specific type
                                 var newparm = typeof(JSONHelper).GetMethod("ParseJSON").MakeGenericMethod(new Type[] { methodParam.ParameterType }).Invoke(this, new Object[] { value });
                                 parameters.Add(methodParam.Name, newparm);
                             }
